@@ -1,9 +1,10 @@
 'use strict'
 const async = require('async')
-const clone = require('clone')
+const SafeEventEmitter = require('safe-event-emitter')
 
-class RpcEngine {
+class RpcEngine extends SafeEventEmitter {
   constructor () {
+    super()
     this._middleware = []
   }
 
@@ -29,8 +30,8 @@ class RpcEngine {
   //
 
   _handle (_req, cb) {
-    // clone request object
-    const req = clone(_req)
+    // shallow clone request object
+    const req = Object.assign({}, _req)
     // create response obj
     const res = {
       id: req.id,
@@ -38,6 +39,15 @@ class RpcEngine {
     }
     // process all middleware
     this._runMiddleware(req, res, (err) => {
+      // take a clear any responseError
+      const responseError = res._originalError
+      delete res._originalError
+      if (responseError) {
+        // ensure no result is present on an errored response
+        delete res.result
+        // return originalError and response
+        return cb(responseError, res)
+      }
       // return response
       cb(err, res)
     })
@@ -95,7 +105,11 @@ class RpcEngine {
         cb()
       }
       function end (err) {
-        if (err) return cb(err)
+        // if errored, set the error but dont pass to callback
+        if (err) {
+          res.error = serializeError(err)
+          res._originalError = err
+        }
         // mark as completed
         isComplete = true
         cb()
@@ -104,12 +118,10 @@ class RpcEngine {
 
     // returns, indicating whether or not it ended
     function completeRequest (err) {
+      // this is an internal catastrophic error, not an error from middleware
       if (err) {
         // prepare error message
-        res.error = {
-          code: err.code || -32603,
-          message: err.stack,
-        }
+        res.error = serializeError(err)
         // return error-first and res with err
         return onDone(err, res)
       }
@@ -121,6 +133,13 @@ class RpcEngine {
   // climbs the stack calling return handlers
   _runReturnHandlersUp (returnHandlers, cb) {
     async.eachSeries(returnHandlers, (handler, next) => handler(next), cb)
+  }
+}
+
+function serializeError(err) {
+  return {
+    code: err.code || -32603,
+    message: err.stack,
   }
 }
 

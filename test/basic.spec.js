@@ -134,6 +134,18 @@ describe('basic tests', function () {
     })
   })
 
+  it('basic notifications', function (done) {
+    const engine = new RpcEngine()
+
+    engine.once('notification', (notif) => {
+      assert.equal(notif.method, 'test_notif')
+      done()
+    })
+
+    const payload = { jsonrpc: '2.0', method: 'test_notif' }
+    engine.emit('notification', payload)
+  })
+
   it('return handlers test', function (done) {
     let engine = new RpcEngine()
 
@@ -198,4 +210,30 @@ describe('basic tests', function () {
       done()
     })
   })
+
+  it('calls back next handler even if error', function (done) {
+    let engine = new RpcEngine()
+
+    let sawNextReturnHandlerCalled = false
+
+    engine.push(function (req, res, next, end) {
+      next(function (cb) {
+        sawNextReturnHandlerCalled = true
+        cb()
+      })
+    })
+
+    engine.push(function(req, res, next, end) {
+      end(new Error('boom'))
+    })
+
+    let payload = { id: 1, jsonrpc: '2.0', method: 'hello' }
+
+    engine.handle(payload, (err, res) => {
+      assert(err, 'did error')
+      assert(sawNextReturnHandlerCalled, 'saw next return handler called')
+      done()
+    })
+  })
+
 })
