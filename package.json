@@ -1,6 +1,6 @@
 {
   "name": "@makeomatic/json-rpc-engine",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "description": "a tool for processing JSON RPC",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -20,30 +20,11 @@
   "license": "ISC",
   "dependencies": {
     "async": "^3.1.0",
-    "clone": "^2.1.1",
-    "json-rpc-error": "^2.0.0",
     "promise-to-callback": "^1.0.0",
-    "safe-event-emitter": "^1.0.1",
-    "core-js": "3"
-  },
-  "browserify": {
-    "transform": [
-      [
-        "babelify",
-        {
-          "presets": [
-            "@babel/preset-env"
-          ]
-        }
-      ]
-    ]
+    "safe-event-emitter": "^1.0.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
-    "aegir": "^18.0.0",
-    "babelify": "^10.0.0",
-    "browserify": "^16.2.3"
+    "aegir": "^18.0.0"
   },
   "repository": {
     "type": "git",
