@@ -23,7 +23,8 @@
     "clone": "^2.1.1",
     "json-rpc-error": "^2.0.0",
     "promise-to-callback": "^1.0.0",
-    "safe-event-emitter": "^1.0.1"
+    "safe-event-emitter": "^1.0.1",
+    "core-js": "3"
   },
   "browserify": {
     "transform": [
@@ -57,5 +58,9 @@
   },
   "contributors": [
     "kumavis <aaron@kumavis.me>"
+  ],
+  "files": [
+    "src/",
+    "dist/"
   ]
 }
